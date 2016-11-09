@@ -10,6 +10,7 @@ typedef unsigned long ulong;
 
 class symbols;
 class rules;
+class features;
 
 // This finds a matching digram in the grammar, and returns a pointer
 // to its entry in the hash table so it can be changed or deleted as necessary
@@ -47,6 +48,46 @@ public:
   int index() { return number; };
   void index(int i) { number = i; };
 };
+
+// Stores features computed on output Sequitur grammars for ML analysis
+
+class features {
+public:
+    features();
+    ~features();
+    
+    //the number of rules in the grammar
+    int num_rules;
+    //average symbols per rule
+    double average_rule_length;
+    //average number of times a rule is used
+    double average_rule_usage;
+    //proportion of terminal characters in grammar (characters)
+    //this feature and the average_rule_usage feature may be measuring very
+    //similar things, so I think only one of these is necessary (Matthew)
+    double proportion_terminal_characters;
+    
+    int* ptr_num_rules() { return &num_rules; };
+    double* ptr_average_rule_length() { return &average_rule_length; };
+    double* ptr_average_rule_usage() { return &average_rule_usage; };
+    double* ptr_proportion_terminal_characters()
+      { return &proportion_terminal_characters; };
+    
+    void print() {
+        cout << "num_rules: " << num_rules << endl;
+        cout << "average_rule_length: " << average_rule_length << endl;
+        cout << "average_rule_usage: " << average_rule_usage << endl;
+        cout << "proportion_terminal_characters: " <<
+          proportion_terminal_characters << endl;
+    }
+};
+
+features::features() {
+    num_rules = 0;
+    average_rule_length = 0;
+    average_rule_usage = 0;
+    proportion_terminal_characters = 0;
+}
 
 class symbols {
   symbols *n, *p;
@@ -309,47 +350,76 @@ symbols **find_digram(symbols *s)
 rules **R;
 int Ri;
 
-void p(rules *r) {
-  for (symbols *p = r->first(); !p->is_guard(); p = p->next())
-    if (p->non_terminal()) {
-      int i;
+void p(rules *r, features *f) {
+    for (symbols *p = r->first(); !p->is_guard(); p = p->next()) {
+        if (p->non_terminal()) {
+            int i;
 
-      if (R[p->rule()->index()] == p->rule())
-        i = p->rule()->index();
-      else {
-        i = Ri;
-        p->rule()->index(Ri);
-        R[Ri ++] = p->rule();
-      }
-
-      cout << i << ' ';
+            if (R[p->rule()->index()] == p->rule())
+                i = p->rule()->index();
+            else {
+                i = Ri;
+                p->rule()->index(Ri);
+                R[Ri ++] = p->rule();
+            }
+            
+            cout << i << ' ';
+            (*f->ptr_average_rule_usage()) ++;
+        }
+        else {
+            if (p->value() == ' ') cout << '_';
+            else if (p->value() == '\n') cout << "\\n";
+            else if (p->value() == '\t') cout << "\\t";
+            else if (p->value() == '\\' ||
+                     p->value() == '(' ||
+                     p->value() == ')' ||
+                     p->value() == '_' ||
+                     isdigit(p->value()))
+                cout << '\\' << char(p->value());
+            else cout << char(p->value());
+            cout << ' ';
+            (*f->ptr_proportion_terminal_characters()) ++;
+        }
+        (*f->ptr_average_rule_length())++;
     }
-    else {
-      if (p->value() == ' ') cout << '_';
-      else if (p->value() == '\n') cout << "\\n";
-      else if (p->value() == '\t') cout << "\\t";
-      else if (p->value() == '\\' ||
-               p->value() == '(' ||
-               p->value() == ')' ||
-               p->value() == '_' ||
-               isdigit(p->value()))
-        cout << '\\' << char(p->value());
-      else cout << char(p->value());
-      cout << ' ';
-    }
-  cout << endl;
+    cout << endl;
 }
 
 void print()
 {
-  R = (rules **) malloc(sizeof(rules *) * num_rules);
-  memset(R, 0, sizeof(rules *) * num_rules);
-  R[0] = &S;
-  Ri = 1;
-
-  for (int i = 0; i < Ri; i ++) {
-    cout << i << " -> ";
-    p(R[i]);
-  }
-  free(R);
+    R = (rules **) malloc(sizeof(rules *) * num_rules);
+    memset(R, 0, sizeof(rules *) * num_rules);
+    R[0] = &S;
+    Ri = 1;
+    
+    features *f = new features;
+    
+    for (int i = 0; i < Ri; i ++) {
+      cout << i << " -> ";
+      p(R[i], f);
+    }
+    
+    *(f->ptr_num_rules()) = num_rules;
+    
+    *(f->ptr_proportion_terminal_characters()) /=
+      *(f->ptr_average_rule_length());
+    
+    *(f->ptr_average_rule_length()) /= (double) num_rules;
+    
+    //rules are used in their own definition
+    *(f->ptr_average_rule_usage()) += num_rules;
+    *(f->ptr_average_rule_usage()) /= (double) num_rules;
+    
+    f->print();
+    free(R);
 }
+
+
+
+
+
+
+
+
+
+
