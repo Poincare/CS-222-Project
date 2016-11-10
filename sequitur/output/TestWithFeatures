@@ -1,7 +1,0 @@
-0 -> 1 1 
-1 -> 2 c 2 d 
-2 -> a b 
-num_rules: 3
-average_rule_length: 2.66667
-average_rule_usage: 2.33333
-proportion_terminal_characters: 0.5

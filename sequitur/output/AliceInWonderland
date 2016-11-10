@@ -8232,3 +8232,5 @@
 8231 -> 358 G 
 8232 -> 8016 1531 
 8233 -> 1188 8127 
+num_rules,average_rule_length,average_rule_usage,proportional_terminal_characters
+8234,5.64355,6.21824,0.0753621

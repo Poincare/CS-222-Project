@@ -74,11 +74,15 @@ public:
       { return &proportion_terminal_characters; };
     
     void print() {
-        cout << "num_rules: " << num_rules << endl;
+        /**cout << "num_rules: " << num_rules << endl;
         cout << "average_rule_length: " << average_rule_length << endl;
         cout << "average_rule_usage: " << average_rule_usage << endl;
         cout << "proportion_terminal_characters: " <<
-          proportion_terminal_characters << endl;
+          proportion_terminal_characters << endl;**/
+        cout << "num_rules,average_rule_length," <<
+        "average_rule_usage,proportional_terminal_characters" << endl;
+        cout << num_rules << "," << average_rule_length << "," <<
+          average_rule_usage << "," << proportion_terminal_characters << endl;
     }
 };
 
