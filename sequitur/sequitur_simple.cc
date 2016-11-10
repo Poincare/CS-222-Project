@@ -1,4 +1,5 @@
 #include <iostream>
+#include <bits/stdc++.h>
 using namespace std;
 
 typedef unsigned long ulong;
@@ -79,10 +80,12 @@ public:
         cout << "average_rule_usage: " << average_rule_usage << endl;
         cout << "proportion_terminal_characters: " <<
           proportion_terminal_characters << endl;**/
-        cout << "num_rules,average_rule_length," <<
-        "average_rule_usage,proportional_terminal_characters" << endl;
-        cout << num_rules << "," << average_rule_length << "," <<
-          average_rule_usage << "," << proportion_terminal_characters << endl;
+        ofstream mydata;
+        mydata.open("seq_features.csv", ios_base::app);
+        // cout << "num_rules,average_rule_length," <<
+        // "average_rule_usage,proportional_terminal_characters" << endl;
+        mydata << num_rules << "," << average_rule_length << "," <<
+          average_rule_usage << "," << proportion_terminal_characters << "," << 0 << endl;
     }
 };
 
