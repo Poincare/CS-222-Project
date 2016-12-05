@@ -23,7 +23,7 @@
 /* # define MICROSOFT */  /* uncomment, if compiling with Visual C++ */
 
 #define MAXSHRINK 50000    /* maximum number of shrinking rounds */
-#define MAX_NUMBER_OF_CHILDREN 100
+#define MAX_NUMBER_OF_CHILDREN 200
 #define MAX_PARSE_TREE_LENGTH 50000
 #define MAX_NUMBER_OF_NODES 1000
 #define MAX_NUMBER_OF_PAIRS 50000
