@@ -33,18 +33,36 @@ class TreeKernel():
         output += " |ET|"
         return output
 
+# Potential questions we should address in the paper:
+# Should we do the breakup by sentence? What about by the number of characters?
+# Is there a better feature than just the number of ham sentences in a particular email
+# that we can derive from the tree-kernel classifier that would be more helpful?
 def output_trees(directory, target):
-    limit = 100
+    limit = 50
     i = 0
     for (dirpath, dirnames, filenames) in walk(directory):
         for filename in filenames:
-            sys.stderr.write("File #%d: %s : %d\n" % (i, filename, target))
             if i > limit:
                 break
-            seq = Sequitur(directory + filename)
-            tk = TreeKernel(seq.compute_grammar())
-            print tk.get_svm_light(target)
-            i += 1
+
+            # sys.stderr.write("File #%d: %s : %d\n" % (i, filename, target))
+            
+            # break up the file into sentences and construct trees for each sentence
+            sentences = []
+            for line in open(directory + filename, 'r'):
+                sentences += line.split('.')
+
+            for sentence in sentences:
+                # have to write the buffer to a file in order for Sequitur Simple to
+                # be able to use it.
+                write_buffer_name = 'sentence_buffer'
+                write_buffer = open(write_buffer_name, 'w')
+                write_buffer.write(sentence + "\n")
+                
+                seq = Sequitur(write_buffer_name)
+                tk = TreeKernel(seq.compute_grammar())
+                print tk.get_svm_light(target)
+                i += 1
         break
 
 ham_directory = "/Users/dhaivat/dev/harvard/cs222/CS-222-Project/enron1/ham/"

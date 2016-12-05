@@ -3,7 +3,7 @@ import subprocess
 class Sequitur(object):
   def __init__(self, input_filename):
     self.input_filename = input_filename
-
+    
   def parse_sequitur_output(self, output):
     grammar = {}
     for line in output:
