@@ -9,7 +9,6 @@ typedef unsigned long ulong;
 // it is feature-poor in order to be as simple as possible.
 // For a more realistic implementation of Sequitur, please use
 // http://sequitur.info/latest/sequitur.tgz
-
 class symbols;
 class rules;
 class features;

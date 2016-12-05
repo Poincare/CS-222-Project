@@ -21,7 +21,6 @@ class Sequitur(object):
     buffer = open('buffer', 'r')
     return self.parse_sequitur_output(buffer.readlines())
 
-
-s = Sequitur('/Users/dhaivat/nltk_data/corpora/gutenberg/austen-emma.txt')
-#s = Sequitur('test.txt')
-print s.compute_grammar()
+if __name__== '__main__':
+  s = Sequitur('/Users/dhaivat/nltk_data/corpora/gutenberg/austen-emma.txt')
+  print s.compute_grammar()
