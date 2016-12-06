@@ -38,7 +38,7 @@ class TreeKernel():
 # Is there a better feature than just the number of ham sentences in a particular email
 # that we can derive from the tree-kernel classifier that would be more helpful?
 def output_trees(directory, target):
-    limit = 300
+    limit = 1000
     i = 0
     for (dirpath, dirnames, filenames) in walk(directory):
         for filename in filenames:
