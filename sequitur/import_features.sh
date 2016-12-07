@@ -1,5 +1,5 @@
 #!/bin/bash
-FILES=../enron1/ham/*
+FILES=../enron/spam/*
 for f in $FILES
 do
 	./sequitur_simple < $f > test.out
