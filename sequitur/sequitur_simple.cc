@@ -75,6 +75,9 @@ public:
     //similar things, so I think only one of these is necessary (Matthew)
     double proportion_terminal_characters;
     
+    double proportion_repeat_rule_bigrams;
+    double proportion_repeat_bigrams;
+    
     int* ptr_num_rules() { return &num_rules; };
     double* ptr_average_rule_length() { return &average_rule_length; };
     double* ptr_average_rule_usage() { return &average_rule_usage; };
@@ -84,6 +87,10 @@ public:
       {return &stddev_rule_length; };
     double* ptr_proportion_terminal_characters()
       { return &proportion_terminal_characters; };
+    double* ptr_proportion_repeat_rule_bigrams()
+      { return &proportion_repeat_rule_bigrams; };
+    double* ptr_proportion_repeat_bigrams()
+      { return &proportion_repeat_bigrams; };
 
     void print() {
         /**cout << "num_rules: " << num_rules << endl;
@@ -98,6 +105,7 @@ public:
         mydata << num_rules << "," << average_rule_length << "," <<
           average_rule_usage << "," << stddev_rule_length << "," <<
           stddev_rule_usage << "," << proportion_terminal_characters << "," <<
+          proportion_repeat_rule_bigrams << "," << proportion_repeat_bigrams <<
           1 << endl;
     }
 };
@@ -106,7 +114,11 @@ features::features() {
     num_rules = 0;
     average_rule_length = 0;
     average_rule_usage = 0;
+    stddev_rule_length = 0;
+    stddev_rule_usage = 0;
     proportion_terminal_characters = 0;
+    proportion_repeat_rule_bigrams = 0;
+    proportion_repeat_bigrams = 0;
 }
 
 class symbols {
@@ -377,6 +389,22 @@ vector<int> rule_usages;
 
 void p(rules *r, features *f) {
     int curr_rule_length = 0;
+    //2 symbols in rule
+    if(r->last == r->first()->next()) {
+        symbols *first = r->first();
+        symbols *last = r->last();
+        if(first->non_terminal() && last->non_terminal()) {
+            if(first->rule()->index() == last->rule()->index()) {
+                (*f->ptr_proportion_repeat_bigrams())++;
+                (*f->ptr_proportion_repeat_rule_bigrams())++;
+            }
+        }
+        else if (!first->non_terminal() && !last->non_terminal()) {
+            if(first->value() == last->value()) {
+                (*f->ptr_proportion_repeat_bigrams())++;
+            }
+        }
+    }
     for (symbols *p = r->first(); !p->is_guard(); p = p->next()) {
         if (p->non_terminal()) {
             int i;
@@ -463,6 +491,9 @@ void print()
     *(f->ptr_stddev_rule_length()) = stddev_length;
     *(f->ptr_stddev_rule_usage()) = stddev_usage;
 
+    *(f->ptr_proportion_repeat_bigrams()) /= (double) num_rules;
+    *(f->ptr_proportion_repeat_rule_bigrams()) /= (double) num_rules;
+    
     f->print();
     free(R);
 }
