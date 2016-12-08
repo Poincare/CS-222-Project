@@ -75,7 +75,12 @@ public:
     //similar things, so I think only one of these is necessary (Matthew)
     double proportion_terminal_characters;
     
+    //rules that are of the form R -> x y, where x,y are any symbols
+    double proportion_bigrams;
+    
+    //rules that are of the form R -> R' R', where R' is another form
     double proportion_repeat_rule_bigrams;
+    //rules that are of the form R -> X X, where X is another symbol
     double proportion_repeat_bigrams;
     
     int* ptr_num_rules() { return &num_rules; };
@@ -87,6 +92,8 @@ public:
       {return &stddev_rule_length; };
     double* ptr_proportion_terminal_characters()
       { return &proportion_terminal_characters; };
+    double* ptr_proportion_bigrams()
+      { return &proportion_bigrams; };
     double* ptr_proportion_repeat_rule_bigrams()
       { return &proportion_repeat_rule_bigrams; };
     double* ptr_proportion_repeat_bigrams()
@@ -105,8 +112,8 @@ public:
         mydata << num_rules << "," << average_rule_length << "," <<
           average_rule_usage << "," << stddev_rule_length << "," <<
           stddev_rule_usage << "," << proportion_terminal_characters << "," <<
-          proportion_repeat_rule_bigrams << "," << proportion_repeat_bigrams <<
-          1 << endl;
+          proportion_bigrams << "," << proportion_repeat_rule_bigrams << "," <<
+          proportion_repeat_bigrams << 1 << endl;
     }
 };
 
@@ -117,6 +124,7 @@ features::features() {
     stddev_rule_length = 0;
     stddev_rule_usage = 0;
     proportion_terminal_characters = 0;
+    proportion_bigrams = 0;
     proportion_repeat_rule_bigrams = 0;
     proportion_repeat_bigrams = 0;
 }
@@ -390,7 +398,8 @@ vector<int> rule_usages;
 void p(rules *r, features *f) {
     int curr_rule_length = 0;
     //2 symbols in rule
-    if(r->last == r->first()->next()) {
+    if(r->last() == r->first()->next()) {
+        (*f->ptr_proportion_bigrams())++;
         symbols *first = r->first();
         symbols *last = r->last();
         if(first->non_terminal() && last->non_terminal()) {
@@ -491,6 +500,7 @@ void print()
     *(f->ptr_stddev_rule_length()) = stddev_length;
     *(f->ptr_stddev_rule_usage()) = stddev_usage;
 
+    *(f->ptr_proportion_bigrams()) /= (double) num_rules;
     *(f->ptr_proportion_repeat_bigrams()) /= (double) num_rules;
     *(f->ptr_proportion_repeat_rule_bigrams()) /= (double) num_rules;
     
