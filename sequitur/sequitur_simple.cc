@@ -1,5 +1,7 @@
 #include <iostream>
 #include <bits/stdc++.h>
+#include <vector>
+#include <math.h>
 
 using namespace std;
 
@@ -29,9 +31,6 @@ class rules {
 
   symbols *guard;
 
-  //  count keeps track of the number of times the rule is used in the grammar
-  int count;
-
   // this is just for numbering the rules nicely for printing; it's
   // not essential for the algorithm
   int number;
@@ -40,6 +39,9 @@ public:
   rules();
   ~rules();
 
+  //  count keeps track of the number of times the rule is used in the grammar
+  int count;
+    
   void reuse() { count ++; }
   void deuse() { count --; };
 
@@ -64,14 +66,22 @@ public:
     double average_rule_length;
     //average number of times a rule is used
     double average_rule_usage;
-    //proportion of terminal characters in grammar (characters)
+    
+    double stddev_rule_length;
+    double stddev_rule_usage;
+    
+    //proportion of terminal characters in grammar
     //this feature and the average_rule_usage feature may be measuring very
     //similar things, so I think only one of these is necessary (Matthew)
     double proportion_terminal_characters;
-
+    
     int* ptr_num_rules() { return &num_rules; };
     double* ptr_average_rule_length() { return &average_rule_length; };
     double* ptr_average_rule_usage() { return &average_rule_usage; };
+    double* ptr_stddev_rule_usage()
+      {return &stddev_rule_usage; };
+    double* ptr_stddev_rule_length()
+      {return &stddev_rule_length; };
     double* ptr_proportion_terminal_characters()
       { return &proportion_terminal_characters; };
 
@@ -86,7 +96,9 @@ public:
         // cout << "num_rules,average_rule_length," <<
         // "average_rule_usage,proportional_terminal_characters" << endl;
         mydata << num_rules << "," << average_rule_length << "," <<
-          average_rule_usage << "," << proportion_terminal_characters << "," << 1 << endl;
+          average_rule_usage << "," << stddev_rule_length << "," <<
+          stddev_rule_usage << "," << proportion_terminal_characters << "," <<
+          1 << endl;
     }
 };
 
@@ -214,13 +226,16 @@ class symbols {
 };
 
 rules S;
+//num characters in file
+int total_num_characters;
 
 int main()
 {
   S.last()->insert_after(new symbols(cin.get()));
   int x = 0;
-
+  total_num_characters = 0;
   while (1) {
+    total_num_characters++;
     int i = cin.get(); if (cin.eof()) break;
     S.last()->insert_after(new symbols(i));
     S.last()->prev()->check();
@@ -357,8 +372,11 @@ symbols **find_digram(symbols *s)
 
 rules **R;
 int Ri;
+vector<int> rule_lengths;
+vector<int> rule_usages;
 
 void p(rules *r, features *f) {
+    int curr_rule_length = 0;
     for (symbols *p = r->first(); !p->is_guard(); p = p->next()) {
         if (p->non_terminal()) {
             int i;
@@ -372,7 +390,6 @@ void p(rules *r, features *f) {
             }
 
             cout << i << ' ';
-            (*f->ptr_average_rule_usage()) ++;
         }
         else {
             if (p->value() == ' ') cout << '_';
@@ -388,8 +405,10 @@ void p(rules *r, features *f) {
             cout << ' ';
             (*f->ptr_proportion_terminal_characters()) ++;
         }
-        (*f->ptr_average_rule_length())++;
+        curr_rule_length++;
     }
+    rule_lengths.push_back(curr_rule_length);
+    rule_usages.push_back(r->count);
     cout << endl;
 }
 
@@ -406,17 +425,43 @@ void print()
       cout << i << " -> ";
       p(R[i], f);
     }
+    
+    double avg_rule_length = 0;
+    double avg_rule_usage = 0;
+
+    for(int i = 0; i < rule_lengths.size(); ++i) {
+        avg_rule_length += rule_lengths[i];
+    }
+    for(int i = 0; i < rule_usages.size(); ++i) {
+        avg_rule_usage += rule_usages[i];
+    }
+    avg_rule_length /= (double) num_rules;
+    //rules are used in their own definition
+    avg_rule_usage += num_rules;
+    avg_rule_usage /= (double) num_rules;
+    
+    double stddev_length = 0;
+    double stddev_usage = 0;
+    for(int i = 0; i < rule_lengths.size(); ++i) {
+        stddev_length += pow(avg_rule_length - rule_lengths[i], 2.0);
+    }
+    
+    for(int i = 0; i < rule_usages.size(); ++i) {
+        stddev_usage += pow(avg_rule_usage - rule_usages[i], 2.0);
+    }
+    
+    stddev_length = sqrt(stddev_length / (double) num_rules);
+    stddev_usage = sqrt(stddev_usage / (double) num_rules);
 
     *(f->ptr_num_rules()) = num_rules;
 
-    *(f->ptr_proportion_terminal_characters()) /=
-      *(f->ptr_average_rule_length());
-
-    *(f->ptr_average_rule_length()) /= (double) num_rules;
-
-    //rules are used in their own definition
-    *(f->ptr_average_rule_usage()) += num_rules;
-    *(f->ptr_average_rule_usage()) /= (double) num_rules;
+    *(f->ptr_proportion_terminal_characters()) /= total_num_characters;
+    
+    *(f->ptr_average_rule_length()) = avg_rule_length;
+    *(f->ptr_average_rule_usage()) = avg_rule_usage;
+    
+    *(f->ptr_stddev_rule_length()) = stddev_length;
+    *(f->ptr_stddev_rule_usage()) = stddev_usage;
 
     f->print();
     free(R);
