@@ -106,14 +106,14 @@ public:
         cout << "proportion_terminal_characters: " <<
           proportion_terminal_characters << endl;**/
         ofstream mydata;
-        mydata.open("seq_features2.csv", ios_base::app);
+        mydata.open("seq_features3.csv", ios_base::app);
         // cout << "num_rules,average_rule_length," <<
         // "average_rule_usage,proportional_terminal_characters" << endl;
         mydata << num_rules << "," << average_rule_length << "," <<
           average_rule_usage << "," << stddev_rule_length << "," <<
           stddev_rule_usage << "," << proportion_terminal_characters << "," <<
           proportion_bigrams << "," << proportion_repeat_rule_bigrams << "," <<
-          proportion_repeat_bigrams << 1 << endl;
+          proportion_repeat_bigrams << "," << 0 << endl;
     }
 };
 
